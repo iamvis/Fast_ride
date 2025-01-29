@@ -1,31 +1,62 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { CaptainDataContext } from '../context/CaptainContext'
+
+
 
 const CaptainSignup = () => {
+  const navigate = useNavigate();
   const [ email, setEmail ] = useState('')
   const [ password, setPassword ] = useState('')
   const [ firstName, setFirstName ] = useState('')
   const [ lastName, setLastName ] = useState('')
-  const [captainData, setCaptainData] = useState({});
+  const [color, setColor] = useState('');
+  const [plate, setPlate] = useState('');
+  const [vehicletype, setVehicleType] = useState('');
+  const [capacity, setCapacity] = useState('');
+  
+
+ 
+
+  const { captain , setCaptain}= useContext(CaptainDataContext)
 
   const submitHandler = async (e) => {
     e.preventDefault()
-    setCaptainData({
+    const newCaptain = {
       fullname: {
-        firstName: firstName,
-        lastName: lastName
+        firstname: firstName,
+        lastname: lastName
       },
       email: email,
-      password: password
+      password: password,
+      vehicle:{
+        color:color,
+        plate:plate,
+        capacity:capacity,
+        vehicletype: vehicletype
+      }
     }
-)
 
 
+//data posting
 
+const response =  await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, newCaptain)
+
+if(response.status ===201){
+  const data = response.data
+  localStorage.setItem('token', data.token);
+  setCaptain(data.captain)
+  navigate('/captain-home')
+}
     setEmail('')
     setFirstName('')
     setLastName('')
     setPassword('')
+    setCapacity('')
+    setColor('')
+    setVehicleType('')
+    setPlate('')
 
   }
   return (
@@ -85,6 +116,54 @@ const CaptainSignup = () => {
               required type="password"
               placeholder='password'
             />
+             <h3 className='text-lg font-medium mb-2'>Vehicle Information</h3>
+             <div className='flex gap-4 mb-7'>
+              <input
+                required
+                className='bg-[#eeeeee] w-1/2 rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
+                type="text"
+                placeholder='Vehicle Color'
+                value={color}
+                onChange={(e) => {
+                  setColor(e.target.value)
+                }}
+              />
+              <input
+                required
+                className='bg-[#eeeeee] w-1/2  rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
+                type="text"
+                placeholder='Vehicle Plate'
+                value={plate}
+                onChange={(e) => {
+                  setPlate(e.target.value)
+                }}
+              />
+            </div>
+            <div className='flex gap-4 mb-7'>
+              <input
+                required
+                className='bg-[#eeeeee] w-1/2 rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
+                type="number"
+                placeholder=' Vehicle Capacity'
+                value={capacity}
+                onChange={(e) => {
+                  setCapacity(e.target.value)
+                }}
+              />
+              <select
+                required
+                className='bg-[#eeeeee] w-1/2  rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
+                placeholder='Vehcle Type'
+                value={vehicletype}
+                onChange={(e) => {
+                  setVehicleType(e.target.value)
+                }} >
+                <option value="" disabled> Select Vehicle Type</option>
+                <option value="car">Car</option>
+                <option value="auto" >Auto</option>
+                <option value="MoterCycle">MotorCycle</option>
+            </select>
+            </div>
 
             <button
               className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base'
