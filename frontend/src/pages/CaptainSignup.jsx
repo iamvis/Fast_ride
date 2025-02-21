@@ -9,8 +9,8 @@ const CaptainSignup = () => {
   const navigate = useNavigate();
   const [ email, setEmail ] = useState('')
   const [ password, setPassword ] = useState('')
-  const [ firstName, setFirstName ] = useState('')
-  const [ lastName, setLastName ] = useState('')
+  const [ firstname, setFirstName ] = useState('')
+  const [ lastname, setLastName ] = useState('')
   const [color, setColor] = useState('');
   const [plate, setPlate] = useState('');
   const [vehicletype, setVehicleType] = useState('');
@@ -25,8 +25,8 @@ const CaptainSignup = () => {
     e.preventDefault()
     const newCaptain = {
       fullname: {
-        firstname: firstName,
-        lastname: lastName
+        firstname: firstname,
+        lastname: lastname
       },
       email: email,
       password: password,
@@ -45,8 +45,8 @@ const response =  await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/re
 
 if(response.status ===201){
   const data = response.data
-  localStorage.setItem('token', data.token);
   setCaptain(data.captain)
+  localStorage.setItem('token', data.token);
   navigate('/captain-home')
 }
     setEmail('')
@@ -76,7 +76,7 @@ if(response.status ===201){
                 className='bg-[#eeeeee] w-1/2 rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
                 type="text"
                 placeholder='First name'
-                value={firstName}
+                value={firstname}
                 onChange={(e) => {
                   setFirstName(e.target.value)
                 }}
@@ -86,7 +86,7 @@ if(response.status ===201){
                 className='bg-[#eeeeee] w-1/2  rounded-lg px-4 py-2 border  text-lg placeholder:text-base'
                 type="text"
                 placeholder='Last name'
-                value={lastName}
+                value={lastname}
                 onChange={(e) => {
                   setLastName(e.target.value)
                 }}

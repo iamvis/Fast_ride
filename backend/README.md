@@ -674,4 +674,210 @@ GET
 ---
 
 
+# Ride Booking API
+
+This API allows users to book rides, get fare estimates, and manage ride statuses.
+
+## Features
+- Create a ride request
+- Get fare estimates based on distance and vehicle type
+- Authenticate users before booking rides
+- Generate OTP for ride verification
+- Accept or cancel ride requests (Captain)
+- Complete ride transactions
+- Handle payment processing and verification
+
+## Technologies Used
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- Google Maps API (for distance and time calculations)
+- JWT for authentication
+
+## Endpoints
+
+### Create Ride
+**POST** `/ride/create`
+
+#### Request Body
+```json
+{
+  "pickup": "string (min: 3 characters)",
+  "destination": "string (min: 3 characters)",
+  "vehicleType": "string (auto | car | moto)"
+}
+```
+
+#### Response
+```json
+{
+  "_id": "rideId",
+  "user": "userId",
+  "pickup": "pickupLocation",
+  "destination": "destinationLocation",
+  "fare": 50,
+  "otp": "123456",
+  "status": "pending"
+}
+```
+
+### Get Fare Estimate
+**GET** `/ride/get-fare`
+
+#### Query Parameters
+- `pickup` (string, required)
+- `destination` (string, required)
+
+#### Response
+```json
+{
+  "auto": 40,
+  "car": 70,
+  "moto": 30
+}
+```
+
+### Accept Ride (Captain)
+**POST** `/ride/accept`
+
+#### Request Body
+```json
+{
+  "rideId": "string (ride ID)",
+  "captainId": "string (captain ID)"
+}
+```
+
+#### Response
+```json
+{
+  "_id": "rideId",
+  "status": "accepted",
+  "captain": "captainId"
+}
+```
+
+### Cancel Ride
+**POST** `/ride/cancel`
+
+#### Request Body
+```json
+{
+  "rideId": "string (ride ID)",
+  "userId": "string (user ID)"
+}
+```
+
+#### Response
+```json
+{
+  "_id": "rideId",
+  "status": "cancelled"
+}
+```
+
+### Complete Ride
+**POST** `/ride/complete`
+
+#### Request Body
+```json
+{
+  "rideId": "string (ride ID)",
+  "captainId": "string (captain ID)"
+}
+```
+
+#### Response
+```json
+{
+  "_id": "rideId",
+  "status": "completed"
+}
+```
+
+### Initiate Payment
+**POST** `/payment/initiate`
+
+#### Request Body
+```json
+{
+  "rideId": "string (ride ID)",
+  "userId": "string (user ID)",
+  "amount": "number"
+}
+```
+
+#### Response
+```json
+{
+  "orderId": "orderId",
+  "paymentLink": "paymentGatewayURL"
+}
+```
+
+### Verify Payment
+**POST** `/payment/verify`
+
+#### Request Body
+```json
+{
+  "orderId": "string (order ID)",
+  "paymentID": "string (payment ID)",
+  "signature": "string (payment signature)"
+}
+```
+
+#### Response
+```json
+{
+  "status": "success",
+  "rideId": "rideId"
+}
+```
+
+## Ride Schema
+- `user`: ObjectId (Reference to user)
+- `captain`: ObjectId (Reference to captain, optional)
+- `pickup`: String (Required)
+- `destination`: String (Required)
+- `fare`: Number (Required)
+- `status`: Enum (pending, accepted, ongoing, completed, cancelled) (Default: pending)
+- `duration`: Number (Seconds)
+- `distance`: Number (Meters)
+- `paymentID`, `orderId`, `signature`: Strings (For payment verification)
+- `otp`: String (6-digit, Required, Not exposed in response)
+
+## How Fare is Calculated
+Fare is based on:
+- Base Fare: (Auto: 30, Car: 50, Moto: 20)
+- Per km rate: (Auto: 10, Car: 15, Moto: 8)
+- Per minute rate: (Auto: 2, Car: 3, Moto: 1.5)
+- Distance and duration are fetched using Google Maps API
+
+## Authentication
+- `authMiddleware.authUser` ensures only logged-in users can create a ride or get fare estimates.
+- `authMiddleware.authCaptain` ensures only captains can accept and complete rides.
+- JWT tokens are used for user and captain authentication.
+
+## OTP Generation
+- OTP is generated using `crypto.randomInt` and stored securely.
+
+## Setup
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Setup `.env` file with MongoDB and API keys
+4. Start server: `npm start`
+
+### Example `.env` File
+```
+MONGO_URI=your_mongo_connection_string
+JWT_SECRET=your_jwt_secret
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+PAYMENT_GATEWAY_KEY=your_payment_gateway_key
+```
+
+---
+
+This README provides an overview of the ride booking API. Let me know if you need further modifications!
+
 

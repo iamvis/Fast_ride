@@ -11,7 +11,7 @@ const UserProtetWrapper = ({
     const {user, setUser}= useContext(UserDataContext);
     const [isLoading, setIsLoading] = useState(true);
 
-    console.log(token)
+    // console.log(token)
 
     useEffect(() => {
       //if token is not present
@@ -26,7 +26,7 @@ const UserProtetWrapper = ({
       }
     }).then(response =>{
       if(response.status==200){
-        setUser(response.data.user);
+        setUser(response.data);
         setIsLoading(false)
       }
     }).catch(e =>{
