@@ -13,7 +13,10 @@ const rideRoutes = require('./routes/ride.routes')
 
 //db invokled
 connectDB();
-app.use(cors());
+app.use(cors(
+   { origin: 'https://fast-ride-tau.vercel.app/',
+    credentials: true}
+));
 app.use('/rides/razorpay/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(cookieParser());
