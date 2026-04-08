@@ -51,44 +51,72 @@ async function markRidePaid({
 async function getFare(pickup , destination) {
     if(!pickup || !destination){
         throw new Error('Pickup and Destination are required');
-
-        
     }
 
-    const distanceTime = await mapService.getDistanceTime(pickup, destination)
- console.log(distanceTime)
+    const distanceTime = await mapService.getDistanceTime(pickup, destination);
+    const distanceKm = Math.max(distanceTime.distance / 1000, 1.2);
+    const durationMin = Math.max(distanceTime.duration / 60, 5);
+    const averageSpeed = distanceKm / Math.max(durationMin / 60, 0.1);
 
-    const baseFare = {
-        auto: 20,
-        car: 30,
-        moto: 15
+    const pricingConfig = {
+        auto: {
+            minimumFare: 70,
+            baseFare: 28,
+            perKmRate: 10.5,
+            perMinuteRate: 1.8,
+            bookingFee: 6,
+            platformFee: 4
+        },
+        car: {
+            minimumFare: 120,
+            baseFare: 52,
+            perKmRate: 16,
+            perMinuteRate: 2.7,
+            bookingFee: 10,
+            platformFee: 8
+        },
+        moto: {
+            minimumFare: 55,
+            baseFare: 20,
+            perKmRate: 8,
+            perMinuteRate: 1.2,
+            bookingFee: 4,
+            platformFee: 3
+        }
     };
 
-    const perKmRate = {
-        auto: 7,
-        car: 8,
-        moto:6
+    const trafficMultiplier =
+        averageSpeed < 16 ? 1.18 :
+        averageSpeed < 24 ? 1.1 :
+        1;
+
+    const longDistanceSurcharge = distanceKm > 12 ? (distanceKm - 12) * 3.5 : 0;
+    const longDurationSurcharge = durationMin > 35 ? (durationMin - 35) * 1.4 : 0;
+
+    const fare = Object.fromEntries(
+        Object.entries(pricingConfig).map(([vehicleType, config]) => {
+            const subtotal =
+                config.baseFare +
+                (distanceKm * config.perKmRate) +
+                (durationMin * config.perMinuteRate) +
+                config.bookingFee +
+                config.platformFee +
+                longDistanceSurcharge +
+                longDurationSurcharge;
+
+            const realisticFare = Math.max(config.minimumFare, subtotal * trafficMultiplier);
+            const roundedFare = Math.ceil(realisticFare / 5) * 5;
+
+            return [vehicleType, roundedFare];
+        })
+    );
+
+    fare._meta = {
+        distanceKm: Number(distanceKm.toFixed(1)),
+        durationMin: Math.round(durationMin),
+        trafficLabel: trafficMultiplier > 1.12 ? 'Heavy traffic pricing' : trafficMultiplier > 1 ? 'Moderate traffic pricing' : 'Standard pricing'
     };
 
-    const perMinuteRate = {
-        auto: 1.2,
-        car: 1.5,
-        moto:1.0
-    };
-
-
-    // Extract distance (meters) and duration (seconds)
-    const distanceKm = distanceTime.distance / 1000; // Convert meters to kilometers
-    const durationMin = distanceTime.duration / 60;  // Convert seconds to minutes
-
-    // Calculate fare for each vehicle type
-    const fare = {
-        auto: Math.round(baseFare.auto + (distanceKm * perKmRate.auto) + (durationMin * perMinuteRate.auto)),
-        car: Math.round(baseFare.car + (distanceKm * perKmRate.car) + (durationMin * perMinuteRate.car)),
-        moto: Math.round(baseFare.moto + (distanceKm * perKmRate.moto) + (durationMin * perMinuteRate.moto))
-    };
-
-  console.log(fare);
     return fare;
 }
 module.exports.getFare = getFare;

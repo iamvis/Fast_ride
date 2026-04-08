@@ -7,6 +7,7 @@ import RideDetailCard from '../components/RideDetailCard';
 import { UserDataContext } from '../context/UserContext';
 import LoaderScreen from '../components/LoaderScreen';
 import { getUserToken } from '../utils/authStorage';
+import { formatCurrency } from '../utils/fare';
 
 const Riding = () => {
     const location = useLocation();
@@ -165,7 +166,7 @@ const Riding = () => {
                         </div>
                         <div className='text-right'>
                             <p className='text-xs uppercase tracking-[0.24em] text-[#8a8075]'>Fare</p>
-                            <p className='mt-2 text-2xl font-semibold text-slate-900'>Rs. {currentRide?.fare ?? '--'}</p>
+                            <p className='mt-2 text-2xl font-semibold text-slate-900'>{formatCurrency(currentRide?.fare)}</p>
                         </div>
                     </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import RideDetailCard from './RideDetailCard';
+import { formatCurrency } from '../utils/fare';
 
 const WaitingForDriver = ({ ride, setWaitingForDriver }) => {
   return (
@@ -27,10 +28,10 @@ const WaitingForDriver = ({ ride, setWaitingForDriver }) => {
           </div>
         </div>
 
-        <div className="mt-5 space-y-1">
-          <RideDetailCard title="Pickup" value={ride?.pickup || 'Pickup pending'} icon="ri-map-pin-user-fill" accent="bg-emerald-50 text-emerald-700" />
-          <RideDetailCard title="Destination" value={ride?.destination || 'Destination pending'} icon="ri-map-pin-2-fill" accent="bg-amber-50 text-amber-700" />
-          <RideDetailCard title="Fare" value={`Rs. ${ride?.fare ?? '--'}`} icon="ri-wallet-3-line" accent="bg-slate-100 text-slate-900" />
+          <div className="mt-5 space-y-1">
+            <RideDetailCard title="Pickup" value={ride?.pickup || 'Pickup pending'} icon="ri-map-pin-user-fill" accent="bg-emerald-50 text-emerald-700" />
+            <RideDetailCard title="Destination" value={ride?.destination || 'Destination pending'} icon="ri-map-pin-2-fill" accent="bg-amber-50 text-amber-700" />
+          <RideDetailCard title="Fare" value={formatCurrency(ride?.fare)} icon="ri-wallet-3-line" accent="bg-slate-100 text-slate-900" />
         </div>
       </div>
     </div>

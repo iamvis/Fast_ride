@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatCurrency } from '../utils/fare';
 
 const vehicles = [
   {
@@ -31,6 +32,8 @@ const vehicles = [
 ];
 
 const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, setVehicleType, fare = {} }) => {
+  const fareMeta = fare?._meta;
+
   const handleSelect = (type) => {
     setVehicleType(type);
     setConfirmRidePanel(true);
@@ -43,6 +46,11 @@ const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, setVehicleType, fa
         <div>
           <span className="auth-badge">Pick a ride</span>
           <h3 className="mt-3 text-2xl font-semibold">Choose the vehicle that fits this trip.</h3>
+          {fareMeta ? (
+            <p className="mt-3 text-sm text-[#6c655c]">
+              {fareMeta.distanceKm} km, about {fareMeta.durationMin} min, {fareMeta.trafficLabel.toLowerCase()}.
+            </p>
+          ) : null}
         </div>
         <button type="button" onClick={() => setVehiclePanel(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-black/5 text-xl text-slate-700">
           <i className="ri-close-line"></i>
@@ -74,10 +82,15 @@ const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, setVehicleType, fa
             </div>
             <p className="mt-1 text-sm text-slate-700">{vehicle.eta}</p>
             <p className="mt-1 text-sm text-[#6c655c]">{vehicle.subtitle}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="fare-pill"><i className="ri-shield-check-line"></i> Base fare included</span>
+              <span className="fare-pill"><i className="ri-time-line"></i> Traffic-adjusted estimate</span>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-xs uppercase tracking-[0.25em] text-[#8a8075]">Fare</p>
-            <p className="mt-2 text-xl font-semibold">Rs. {fare[vehicle.key] ?? '--'}</p>
+            <p className="mt-2 text-xl font-semibold">{formatCurrency(fare[vehicle.key])}</p>
+            <p className="mt-1 text-xs text-[#6c655c]">Estimated before tolls</p>
           </div>
         </button>
       ))}

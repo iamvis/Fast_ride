@@ -1,7 +1,10 @@
 import React from 'react';
 import RideDetailCard from './RideDetailCard';
+import { formatCurrency } from '../utils/fare';
 
 const LookingForDriver = ({ setVehicleFound, pickup, destination, fare = {}, vehicleType }) => {
+    const fareMeta = fare?._meta;
+
     return (
         <div className="text-slate-900">
             <div className="flex items-start justify-between gap-4">
@@ -16,10 +19,15 @@ const LookingForDriver = ({ setVehicleFound, pickup, destination, fare = {}, veh
 
             <div className="mt-6 rounded-[28px] border border-black/5 bg-white/80 p-5">
                 <div className="status-chip warning"><i className="ri-loader-4-line animate-spin"></i> Matching in progress</div>
+                {fareMeta ? (
+                    <p className="mt-4 text-sm text-[#6c655c]">
+                        Expect around {fareMeta.durationMin} min of travel over {fareMeta.distanceKm} km. Final fare may vary slightly with route or toll changes.
+                    </p>
+                ) : null}
                 <div className="mt-5 space-y-1">
                     <RideDetailCard title="Pickup" value={pickup || 'Waiting for pickup'} icon="ri-map-pin-user-fill" accent="bg-emerald-50 text-emerald-700" />
                     <RideDetailCard title="Destination" value={destination || 'Waiting for destination'} icon="ri-map-pin-2-fill" accent="bg-amber-50 text-amber-700" />
-                    <RideDetailCard title="Estimated fare" value={`Rs. ${fare[vehicleType] ?? '--'}`} icon="ri-wallet-3-line" accent="bg-slate-100 text-slate-900" />
+                    <RideDetailCard title="Estimated fare" value={formatCurrency(fare[vehicleType])} icon="ri-wallet-3-line" accent="bg-slate-100 text-slate-900" />
                 </div>
             </div>
         </div>
