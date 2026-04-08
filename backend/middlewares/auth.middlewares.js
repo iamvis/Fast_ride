@@ -1,6 +1,6 @@
 const userModel = require('../models/user.model')
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require('../utils/jwt');
 const blacklistTokenModel = require('../models/blacklistToken.model');
 const captainModel = require('../models/captain.model')
 
@@ -9,7 +9,7 @@ const captainModel = require('../models/captain.model')
 
 //logic for authUser
 module.exports.authUser = async (req, res, next)=>{
-    //extracking token from cookies and header(have to use splite fro only geting token)
+    //extracking token from cookies and header (have to use splite froM only geting token)
     const token = req.cookies.token || req.headers.authorization?.split(' ')[ 1 ];
    
     //checking token present in cookies or in  headers
@@ -29,6 +29,9 @@ module.exports.authUser = async (req, res, next)=>{
         //verifying token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await userModel.findById(decoded._id);
+        if(!user){
+            return res.status(401).json({message:'Unauthorized'});
+        }
         req.user = user;
         return next();
     }catch(err){
@@ -60,6 +63,9 @@ module.exports.authCaptain = async(req, res, next) =>{
         //verifying token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const captain = await captainModel.findById(decoded._id)
+        if(!captain){
+            return res.status(401).json({message:"Unauthorized"});
+        }
         req.captain = captain;
         return next();
     }catch(err){

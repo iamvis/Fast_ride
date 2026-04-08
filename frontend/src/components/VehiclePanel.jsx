@@ -1,53 +1,88 @@
-import React from 'react'
+import React from 'react';
 
-const VehiclePanel = (props) => {
+const vehicles = [
+  {
+    key: 'car',
+    title: 'Fastride Go',
+    subtitle: 'Affordable city rides',
+    eta: '2 min away',
+    capacity: 4,
+    image: '/vehicle-car.svg',
+    fallback: '/vehicle-car.svg',
+  },
+  {
+    key: 'auto',
+    title: 'Fastride Auto',
+    subtitle: 'Quick and economical for shorter trips',
+    eta: '3 min away',
+    capacity: 3,
+    image: '/vehicle-auto.svg',
+    fallback: '/vehicle-auto.svg',
+  },
+  {
+    key: 'moto',
+    title: 'Fastride Moto',
+    subtitle: 'Fastest option for solo riders',
+    eta: '1 min away',
+    capacity: 1,
+    image: '/vehicle-moto.svg',
+    fallback: '/vehicle-moto.svg',
+  },
+];
+
+const VehiclePanel = ({ setVehiclePanel, setConfirmRidePanel, setVehicleType, fare = {} }) => {
+  const handleSelect = (type) => {
+    setVehicleType(type);
+    setConfirmRidePanel(true);
+    setVehiclePanel(false);
+  };
+
   return (
-    <div>
-       <h5 onClick={()=>{
-      props.setVehiclePanel(false)
-    }} 
-    className="absolute top-6 right-6 text-2xl"
-    > <i className="ri-arrow-down-wide-line"></i></h5>
-    <h3 className="text-2xl font-semibold mb-5">Choose Vehicle</h3>
-      <div onClick={()=>{
-        props.setConfirmRidePanel(true)
-        props.setVehicleType('car')
-      }} className="flex border-2 active:border-black rounded-xl w-full p-3 items-center justify-between">
-        <img className="h-12" src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1714471451/assets/27/362eaf-3e88-4568-a460-29b0da41c285/original/UberX-%281%29.png" alt="" />
-        <div className="w-1/2" >
-          <h4 className="font-medium text-base">UberGo <span><i className="ri-user-3-fill"></i>4</span></h4>
-          <h5 className="font-medium text-sm">2 Mins away</h5>
-          <p className="font-medium text-xs text-gray-600">Affordable and Compact Price</p>
+    <div className="space-y-4 text-slate-900">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="auth-badge">Pick a ride</span>
+          <h3 className="mt-3 text-2xl font-semibold">Choose the vehicle that fits this trip.</h3>
         </div>
-        <h2 className="w-1/5 text-xl font-semibold">₹{props.fare.car}</h2>
-      </div>
-      <div  onClick={()=>{
-        props.setConfirmRidePanel(true)
-        props.setVehicleType('moto')
-      }} className="flex border-2 active:border-black rounded-xl w-full p-3 items-center justify-between">
-        <img className="h-12" src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1648431773/assets/1d/db8c56-0204-4ce4-81ce-56a11a07fe98/original/Uber_Auto_558x372_pixels_Desktop.png" alt="" />
-        <div className="w-1/2" >
-          <h4 className="font-medium text-base">UberGo <span><i className="ri-user-3-fill"></i>4</span></h4>
-          <h5 className="font-medium text-sm">2 Mins away</h5>
-          <p className="font-medium text-xs text-gray-600">Affordable and Compact Price</p>
-        </div>
-        <h2 className="w-1/5 text-xl font-semibold">₹{props.fare.auto}</h2>
-      </div>
-      <div  onClick={()=>{
-        props.setConfirmRidePanel(true)
-        props.setVehicleType('auto')
-      }} className="flex border-2 active:border-black rounded-xl w-full p-3 items-center justify-between">
-        <img className="h-12" src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_368,w_552/v1649231091/assets/2c/7fa194-c954-49b2-9c6d-a3b8601370f5/original/Uber_Moto_Orange_312x208_pixels_Mobile.png" alt="" />
-        <div className="w-1/2" >
-          <h4 className="font-medium text-base">UberGo <span><i className="ri-user-3-fill"></i>4</span></h4>
-          <h5 className="font-medium text-sm">2 Mins away</h5>
-          <p className="font-medium text-xs text-gray-600">Affordable and Compact Price</p>
-        </div>
-        <h2 className=" w-1/5 text-xl font-semibold">₹{props.fare.moto}</h2>
+        <button type="button" onClick={() => setVehiclePanel(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-black/5 text-xl text-slate-700">
+          <i className="ri-close-line"></i>
+        </button>
       </div>
 
+      {vehicles.map((vehicle) => (
+        <button
+          key={vehicle.key}
+          type="button"
+          onClick={() => handleSelect(vehicle.key)}
+          className="flex w-full items-center gap-4 rounded-[24px] border border-black/5 bg-white/85 p-4 text-left transition hover:-translate-y-0.5 hover:border-slate-900/12 hover:bg-white"
+        >
+          <img
+            className="h-16 w-20 rounded-2xl object-cover bg-slate-100"
+            src={vehicle.image}
+            alt={vehicle.title}
+            onError={(event) => {
+              if (event.currentTarget.src.endsWith(vehicle.fallback)) {
+                return;
+              }
+              event.currentTarget.src = vehicle.fallback;
+            }}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h4 className="text-lg font-semibold">{vehicle.title}</h4>
+              <span className="text-sm text-[#6c655c]"><i className="ri-user-3-line"></i> {vehicle.capacity}</span>
+            </div>
+            <p className="mt-1 text-sm text-slate-700">{vehicle.eta}</p>
+            <p className="mt-1 text-sm text-[#6c655c]">{vehicle.subtitle}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#8a8075]">Fare</p>
+            <p className="mt-2 text-xl font-semibold">Rs. {fare[vehicle.key] ?? '--'}</p>
+          </div>
+        </button>
+      ))}
     </div>
-  )
-}
+  );
+};
 
-export default VehiclePanel
+export default VehiclePanel;

@@ -1,5 +1,6 @@
 const blacklistTokenModel = require('../models/blacklistToken.model');
 const captainModel = require('../models/captain.model')
+const rideModel = require('../models/ride.model')
 const captainService = require('../services/captain.service')
 const {validationResult} = require('express-validator')
 
@@ -90,7 +91,31 @@ if(!captain){
 
 
 module.exports.getCaptainProfile = async(req, res, next)=>{
-    res.status(200).json(req.captain)
+    const captainId = req.captain._id;
+
+    const [stats] = await rideModel.aggregate([
+        {
+            $match: {
+                captain: captainId,
+                status: 'completed'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalEarnings: { $sum: '$fare' },
+                completedTrips: { $sum: 1 }
+            }
+        }
+    ]);
+
+    res.status(200).json({
+        ...req.captain.toObject(),
+        stats: {
+            totalEarnings: stats?.totalEarnings || 0,
+            completedTrips: stats?.completedTrips || 0,
+        }
+    })
 }
 
 

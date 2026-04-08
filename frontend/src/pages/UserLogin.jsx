@@ -1,83 +1,91 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import  { UserDataContext } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { UserDataContext } from '../context/UserContext';
+import AuthLayout from '../components/AuthLayout';
+import { setUserToken } from '../utils/authStorage';
 
 const UserLogin = () => {
-  //to way binding to React component
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userData, setUserData] = useState({});
-
-  // to use navigate
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useContext(UserDataContext);
 
-  //d structuring data from the user constext
-  const {user, setUser}= useContext(UserDataContext)
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
 
-  const submitHandler = async (e)=>{
-         e.preventDefault();
-       const  userData= {
-        email:email,
-        password:password
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, { email, password });
+
+      if (response.status === 200) {
+        const data = response.data;
+        setUserToken(data.token);
+        setUser(data.user);
+        navigate('/home');
       }
-
-        //data [posting for usr]
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
-        if(response.status== 200){
-          const data = response.data 
-          localStorage.setItem('token', data.token)
-          setUser(data.user)
-
-          navigate('/home')
-        }        
-         setEmail('')
-          setPassword('')
-
-  }
-
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to sign you in right now.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="p-7 h-screen justify-between flex flex-col">
+    <AuthLayout
+      badge="Rider login"
+      title="Welcome back to a smoother commute."
+      subtitle="Sign in to request a ride, compare vehicle options, and keep every trip in view from pickup to drop-off."
+      footerText="New here?"
+      footerLink="/signup"
+      footerLabel="Create a rider account"
+      switchText="Switch"
+      switchLink="/captain-login"
+      switchLabel="Captain sign in"
+    >
       <div>
-      <img className="w-16 mb-10" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" />
-      <form onSubmit={(e)=>{submitHandler(e)}} >
-        <h3 className="text-lg font-medium mb-2 ">What's your email</h3>
-        <input 
-        required 
-        value={email}
-        onChange={(e)=>{
-         setEmail(e.target.value)  
-        }}
-        type="email"
-        placeholder='email@example.com'
-        className="bg-[#eeeeee] rounded mb-7 px-4 py-2 border text-lg w-full placeholder:text-base "
-         />
-        <h3 className="text-lg font-medium mb-2">Enter your Password</h3>
-        <input 
-        required 
-        value={password}
-        onChange={(e)=>{
-         setPassword(e.target.value)  
-        }}
-        type="password"
-        placeholder='Enter your password'
-        className="bg-[#eeeeee] rounded mb-7 px-4 py-2 border text-lg w-full placeholder:text-base"
-         />
-         <button 
-         className="flex flex-col items-center text-white bg-black mb-2 px-4 py-2 rounded text-lg font-semibold w-full">Login</button>
-         
-      </form>
-      <p className="text-center">New here? <Link to='/signup' className="text-blue-600 font-medium">Create a Account</Link></p>
-      </div>
-      <div>
-        
-      <Link
-      to='/captain-login'
-         className="flex flex-col justify-center items-center text-white bg-green-600 mb-7 px-4 py-2 font-semibold rounded text-lg w-full">Sign in as Captain</Link>
-      </div>
-    </div>
-  )
-}
+        <h2 className="text-3xl font-semibold text-slate-900">Sign in as rider</h2>
+        <p className="mt-3 text-sm leading-6 text-[#6c655c]">Use the account you created for booking and tracking rides.</p>
 
-export default UserLogin
+        <form onSubmit={submitHandler} className="mt-8 space-y-5">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-800">Email</label>
+            <input
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="name@example.com"
+              className="auth-input"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-800">Password</label>
+            <input
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="Enter your password"
+              className="auth-input"
+            />
+          </div>
+
+          {error ? (
+            <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">{error}</div>
+          ) : null}
+
+          <button disabled={isSubmitting} className="primary-button w-full disabled:opacity-70">
+            {isSubmitting ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
+      </div>
+    </AuthLayout>
+  );
+};
+
+export default UserLogin;

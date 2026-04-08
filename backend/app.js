@@ -14,6 +14,7 @@ const rideRoutes = require('./routes/ride.routes')
 //db invokled
 connectDB();
 app.use(cors());
+app.use('/rides/razorpay/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -22,7 +23,7 @@ app.use(express.urlencoded({extended:true}));
 
 
 app.get('/', (req, res)=>{
-    res.send("jay siyaram")
+    res.send("Fastride API WELCOME YOU")
 });
 
 app.use('/users', userRoutes);

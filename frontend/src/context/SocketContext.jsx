@@ -1,5 +1,5 @@
 
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useEffect, useMemo } from 'react';
 import { io } from 'socket.io-client';
 
 export const SocketContext = createContext();
@@ -7,21 +7,27 @@ const socket = io(`${import.meta.env.VITE_BASE_URL}`); // Replace with your serv
 
 const SocketProvider = ({ children }) => {
     useEffect(() => {
-        // Basic connection logic
-        socket.on('connect', () => {
+        const handleConnect = () => {
             console.log('Connected to server');
-        });
+        };
 
-        socket.on('disconnect', () => {
+        const handleDisconnect = () => {
             console.log('Disconnected from server');
-        });
+        };
 
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+
+        return () => {
+            socket.off('connect', handleConnect);
+            socket.off('disconnect', handleDisconnect);
+        };
     }, []);
 
-
+    const contextValue = useMemo(() => ({ socket }), []);
 
     return (
-        <SocketContext.Provider value={{ socket }}>
+        <SocketContext.Provider value={contextValue}>
             {children}
         </SocketContext.Provider>
     );

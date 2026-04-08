@@ -1,25 +1,21 @@
 import React, { createContext, useState } from 'react'
 
-//context for user data
-export const  UserDataContext = createContext()
+export const UserDataContext = createContext()
 
-const UserContext = ({children}) => {
+const UserContext = ({ children }) => {
     const [user, setUser] = useState({
-        email:'',
-        fullname:{
-            firstname:'',
-            lastname:''
+        email: '',
+        fullname: {
+            firstname: '',
+            lastname: ''
         }
     });
-   
 
-  return (
-    <div>
-      <UserDataContext.Provider value={{user, setUser}}>
-        {children}
-      </UserDataContext.Provider>
-    </div>
-  )
+    return (
+        <UserDataContext.Provider value={{ user, setUser }}>
+            {children}
+        </UserDataContext.Provider>
+    )
 }
 
 export default UserContext

@@ -9,24 +9,24 @@ function initializeSocket(server) {
     cors: {
       origin: "*",
       methods: ["GET", "POST"],
-    },
+    }
   });
 
-  io.on("connection", (socket) => {
+  io.on('connection', (socket) => {
     console.log(`Client Connected: ${socket.id}`);
 
-    socket.on("join", async (data) => {
+    socket.on('join', async (data) => {
       const { userId, userType } = data;
 
-      if (userType === "user") {
+      if (userType === 'user') {
         await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
-      } else if (userType === "captain") {
+      } else if (userType === 'captain') {
         await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
       }
     });
 
     //for updating location
-    socket.on('update-loaction-captain', async (data)=>{
+    socket.on('update-location-captain', async (data)=>{
       
       const {userId , location} = data;
       // validation
@@ -49,8 +49,12 @@ function initializeSocket(server) {
   });
 }
 
-function sendMessageToSocketId(socketId, messageObject) {
+const sendMessageToSocketId=(socketId, messageObject) => {
   console.log((`sending msg to socket ${socketId}`,messageObject))
+  if (!socketId) {
+    console.log("Socket ID missing, skipping emit");
+    return;
+  }
   if (io) {
     io.to(socketId).emit(messageObject.event, messageObject.data);
   } else {

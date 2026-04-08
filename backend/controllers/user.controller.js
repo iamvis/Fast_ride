@@ -26,7 +26,7 @@ module.exports.registerUser = async (req, res, next)=>{
     //hashing password
     const hashPassword = await userModel.hashPassword(password);
 
-   const user= await userService.createUser({
+   const user = await userService.createUser({
     firstname:fullname.firstname,
     lastname:fullname.lastname,
     email,

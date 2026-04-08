@@ -1,63 +1,44 @@
-import React from 'react'
+import React from 'react';
+import RideDetailCard from './RideDetailCard';
 
-const 
-RidePopUp = (props) => {
- 
+const RidePopUp = ({ ride, setRidePopUpPanel, setConfirmRidePopUpPanel, confirmRide }) => {
+  const riderName = `${ride?.user?.fullname?.firstname || ''} ${ride?.user?.fullname?.lastname || ''}`.trim();
 
   return (
-    <div>
-    <h5 className='p-1 text-center w-[93%] absolute top-0' onClick={() => {
-     props.setRidePopUpPanel(false)
-    }}><i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i></h5>
-    <h3 className='text-2xl font-semibold mb-5'>New Ride Available</h3>
-
-    <div className= "flex items-center justify-between p-3 bg-yellow-400 rounded-lg mt-4">
-        <div className="flex items-center gap-3 ">
-            <img className="h-12 w-12 rounded-full object-cover" 
-            src="https://www.thetopfamous.com/wp-content/uploads/2023/01/Hande-Ercel-Actress.jpg" alt="" />
-        <h4 className="text-lg font-medium">{props.ride?.user.fullname.firstname + " " + props.ride?.user.fullname.lastname}</h4>
+    <div className="text-slate-900">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="status-chip warning"><i className="ri-notification-3-line"></i> New request</span>
+          <h3 className="mt-3 text-2xl font-semibold">A rider is ready nearby.</h3>
         </div>
-        <h5 className="text-lg font-semibold" >2.2 km</h5>
-    </div>
-  
+        <button type="button" onClick={() => setRidePopUpPanel(false)} className="flex h-11 w-11 items-center justify-center rounded-full bg-black/5 text-xl text-slate-700">
+          <i className="ri-close-line"></i>
+        </button>
+      </div>
 
-    <div className='flex gap-2 justify-between flex-col items-center'>
-              <div className='w-full mt-5'>
-            <div className='flex items-center gap-5 p-3 border-b-2'>
-                <i className="ri-map-pin-user-fill"></i>
-                <div>
-                    <h3 className='text-lg font-medium'>562/11-A</h3>
-                    <p className='text-sm -mt-1 text-gray-600'>{props.ride?.pickup}</p>
-                </div>
-            </div>
-            <div className='flex items-center gap-5 p-3 border-b-2'>
-                <i className="text-lg ri-map-pin-2-fill"></i>
-                <div>
-                    <h3 className='text-lg font-medium'>562/11-A</h3>
-                    <p className='text-sm -mt-1 text-gray-600'>{props.ride?.destination}</p>
-                </div>
-            </div>
-            <div className='flex items-center gap-5 p-3'>
-                <i className="ri-currency-line"></i>
-                <div>
-                    <h3 className='text-lg font-medium'>₹{props.ride?.fare}</h3>
-                    <p className='text-sm -mt-1 text-gray-600'>Cash Cash</p>
-                </div>
-            </div>
+      <div className="mt-6 rounded-[28px] border border-yellow-200 bg-yellow-50/80 p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.26em] text-[#8a8075]">Pickup request</p>
+            <h4 className="mt-1 text-xl font-semibold">{riderName || 'New rider'}</h4>
+          </div>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.26em] text-[#8a8075]">Estimated</p>
+            <p className="mt-1 text-lg font-semibold">Rs. {ride?.fare ?? '--'}</p>
+          </div>
         </div>
-        <button onClick={() => {
-          props.setConfmRidePopUpPanel(true);
-          props.confirmRide();
-         
-        }} 
-        className='w-full mt-5 bg-green-600 text-white font-semibold p-5 rounded-lg'>Accept</button>
-        <button onClick={() => {
-        props.setRidePopUpPanel(false)
-        
-        }} 
-        className='w-full mt-1 bg-gray-300 text-gray-700 font-semibold p-5 rounded-lg'>Ignore</button>
+
+        <div className="mt-5 space-y-1">
+          <RideDetailCard title="Pickup" value={ride?.pickup || 'Pickup pending'} icon="ri-map-pin-user-fill" accent="bg-emerald-50 text-emerald-700" />
+          <RideDetailCard title="Destination" value={ride?.destination || 'Destination pending'} icon="ri-map-pin-2-fill" accent="bg-amber-50 text-amber-700" />
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <button onClick={async () => { await confirmRide(); setConfirmRidePopUpPanel(true); }} className="primary-button w-full">Accept ride</button>
+        <button onClick={() => setRidePopUpPanel(false)} className="secondary-button w-full">Ignore for now</button>
+      </div>
     </div>
-</div>
   )
 }
 

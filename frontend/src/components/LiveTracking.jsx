@@ -1,78 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import H from '@here/maps-api-for-javascript';
+import React, { useEffect, useRef, useState } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const containerStyle = {
     width: '100%',
     height: '100vh',
 };
 
-const center = {
-    lat: -3.745,
-    lng: -38.523,
+const defaultCenter = {
+    ltd: 23.2599,
+    lng: 77.4126,
+};
+
+const osmStyle = {
+    version: 8,
+    sources: {
+        osm: {
+            type: 'raster',
+            tiles: [
+                'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            tileSize: 256,
+            attribution: '&copy; OpenStreetMap contributors'
+        }
+    },
+    layers: [
+        {
+            id: 'osm-tiles',
+            type: 'raster',
+            source: 'osm'
+        }
+    ]
 };
 
 const LiveTracking = () => {
-    const [currentPosition, setCurrentPosition] = useState(center);
-    const mapRef = React.useRef(null);
+    const [currentPosition, setCurrentPosition] = useState(defaultCenter);
+    const mapContainerRef = useRef(null);
+    const mapRef = useRef(null);
+    const markerRef = useRef(null);
 
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition((position) => {
-            const { latitude, longitude } = position.coords;
-            setCurrentPosition({
-                lat: latitude,
-                lng: longitude,
-            });
+        if (!mapContainerRef.current || mapRef.current) {
+            return;
+        }
+
+        mapRef.current = new maplibregl.Map({
+            container: mapContainerRef.current,
+            style: osmStyle,
+            center: [defaultCenter.lng, defaultCenter.ltd],
+            zoom: 14,
         });
 
-        const watchId = navigator.geolocation.watchPosition((position) => {
+        mapRef.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+        markerRef.current = new maplibregl.Marker({ color: '#111827' })
+            .setLngLat([defaultCenter.lng, defaultCenter.ltd])
+            .addTo(mapRef.current);
+
+        return () => {
+            markerRef.current?.remove();
+            markerRef.current = null;
+            mapRef.current?.remove();
+            mapRef.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            return;
+        }
+
+        const updatePosition = (position) => {
             const { latitude, longitude } = position.coords;
-            setCurrentPosition({
-                lat: latitude,
-                lng: longitude,
-            });
-        });
+            setCurrentPosition({ ltd: latitude, lng: longitude });
+        };
+
+        navigator.geolocation.getCurrentPosition(updatePosition);
+        const watchId = navigator.geolocation.watchPosition(updatePosition);
 
         return () => navigator.geolocation.clearWatch(watchId);
     }, []);
 
     useEffect(() => {
-        if (mapRef.current && currentPosition) {
-            const platform = new H.service.Platform({
-                apikey: import.meta.env.VITE_HERE_MAPS_API_KEY,
-            });
-            const defaultLayers = platform.createDefaultLayers();
-
-            const map = new H.Map(
-                mapRef.current,
-                defaultLayers.vector.normal.map,
-                {
-                    center: currentPosition,
-                    zoom: 15,
-                    pixelRatio: window.devicePixelRatio || 1,
-                }
-            );
-
-            const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
-            const ui = H.ui.UI.createDefault(map, defaultLayers);
-
-            const marker = new H.map.Marker(currentPosition);
-            map.addObject(marker);
-
-            const updatePosition = () => {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const { latitude, longitude } = position.coords;
-                    setCurrentPosition({ lat: latitude, lng: longitude });
-                    marker.setGeometry({ lat: latitude, lng: longitude });
-                    map.setCenter({ lat: latitude, lng: longitude });
-                });
-            };
-
-            const intervalId = setInterval(updatePosition, 1000);
-            return () => clearInterval(intervalId);
+        if (!mapRef.current || !markerRef.current) {
+            return;
         }
+
+        const lngLat = [currentPosition.lng, currentPosition.ltd];
+        markerRef.current.setLngLat(lngLat);
+        mapRef.current.easeTo({ center: lngLat, duration: 500 });
     }, [currentPosition]);
 
-    return <div ref={mapRef} style={containerStyle}></div>;
+    return <div ref={mapContainerRef} style={containerStyle}></div>;
 };
 
 export default LiveTracking;

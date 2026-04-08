@@ -45,6 +45,25 @@ router.post('/end-ride',
     rideController.endRide
 )
 
+router.post('/payment-order',
+    authMiddleware.authUser,
+    body('rideId').isMongoId().withMessage('Invalid ride id'),
+    rideController.createPaymentOrder
+)
+
+router.post('/verify-payment',
+    authMiddleware.authUser,
+    body('rideId').isMongoId().withMessage('Invalid ride id'),
+    body('razorpay_order_id').isString().notEmpty().withMessage('Invalid Razorpay order id'),
+    body('razorpay_payment_id').isString().notEmpty().withMessage('Invalid Razorpay payment id'),
+    body('razorpay_signature').isString().notEmpty().withMessage('Invalid Razorpay signature'),
+    rideController.verifyPayment
+)
+
+router.post('/razorpay/webhook',
+    rideController.handleRazorpayWebhook
+)
+
 
 
 module.exports = router;

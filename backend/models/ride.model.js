@@ -23,6 +23,15 @@ const rideSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'paid', 'failed'],
+        default: 'pending',
+    },
+    paymentMethod: {
+        type: String,
+        default: 'razorpay',
+    },
 
     status: {
         type: String,
@@ -47,12 +56,17 @@ const rideSchema = new mongoose.Schema({
     signature: {
         type: String,
     },
+    paidAt: {
+        type: Date,
+    },
 
     otp: {
         type: String,
         select: false,
         required: true,
     },
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('ride', rideSchema);
