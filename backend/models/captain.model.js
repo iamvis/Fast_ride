@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require('../utils/jwt');
 
 const captainSchema = new mongoose.Schema({
     fullname :{
@@ -56,11 +56,11 @@ const captainSchema = new mongoose.Schema({
         vehicletype:{
             type:String,
             required:true,
-            enum:['car', 'motercycle', 'auto']
+            enum:['car', 'motorcycle', 'auto']
         }
     },
     location:{
-        lat:{
+        ltd:{
             type:Number
 
         },
@@ -78,12 +78,12 @@ captainSchema.methods.generateAuthToken = function (){
 }
 
 // method fro comapre password
-
-captainSchema.methods.comparePassword= async function(password){
+captainSchema.methods.comparePassword = async function(password){
     return await bcrypt.compare(password, this.password)
 }
+
 //hash password
-captainSchema.statics.hashPassword= async function(password){
+captainSchema.statics.hashPassword = async function(password){
     return await bcrypt.hash(password, 10)
 }
 

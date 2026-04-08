@@ -1,6 +1,6 @@
 const mongoose= require('mongoose');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require('../utils/jwt');
 
 const userSchema = new mongoose.Schema({
     fullname:{
@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
 //methods of user
 //user token genarate
 userSchema.methods.generateAuthToken = function(){
-    //give the id and the key it wil;l generate uniquewq token for specific candidate
+    //give the id and the key it will generate unique token for specific candidate
     const token = jwt.sign({_id:this._id},
          process.env.JWT_SECRET,
           {expiresIn:'24h'}) 
